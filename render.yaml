@@ -1,0 +1,21 @@
+# Este é um arquivo de configuração para o Render.com
+# Ele define como sua aplicação será implantada na plataforma Render
+
+# O serviço principal da aplicação
+services:
+  - type: web                     # Tipo de serviço (web = aplicação web)
+    name: tmdb   # Nome do serviço (pode alterar para o nome do seu projeto)
+    env: python                   # Ambiente de execução (Python)
+    plan: free                    # Plano gratuito do Render
+    buildCommand: "pip install -r requirements.txt"  # Comando para instalar as dependências
+    startCommand: "gunicorn app:app"                 # Comando para iniciar a aplicação (ajuste se seu arquivo principal não for app.py)
+    envVars:                      # Variáveis de ambiente (adicione conforme necessário)
+      - key: FLASK_ENV
+        value: production
+      # - key: OUTRA_VARIAVEL
+      #   value: valor
+
+# Dicas:
+# - Certifique-se de que seu arquivo principal Flask se chama app.py e contém a variável 'app'.
+# - Se o nome do arquivo ou da variável for diferente, ajuste o startCommand para refletir isso.
+# - Adicione outras variáveis de ambiente em envVars conforme necessário.
