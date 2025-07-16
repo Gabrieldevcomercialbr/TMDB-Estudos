@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}{{ movie.title }} - TMDB Explorer{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Poster e informações principais -->
+    <div class="col-lg-4 col-md-5 mb-4">
+        <div class="card border-0 shadow">
+            {% if movie.poster_path %}
+                <img src="{{ image_base_url }}{{ movie.poster_path }}" 
+                     alt="{{ movie.title }}" 
+                     class="card-img-top"
+                     style="border-radius: 10px 10px 0 0;">
+            {% else %}
+                <div class="card-img-top d-flex align-items-center justify-content-center bg-light" 
+                     style="height: 400px; border-radius: 10px 10px 0 0;">
+                    <i class="fas fa-image fa-4x text-muted"></i>
+                </div>
+            {% endif %}
+            
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="badge bg-warning text-dark fs-6">
+                        <i class="fas fa-star me-1"></i>
+                        {{ "%.1f"|format(movie.vote_average) }}
+                    </span>
+                    <span class="text-muted">
+                        {{ movie.vote_count }} votos
+                    </span>
+                </div>
+                
+                {% if movie.release_date %}
+                    <p class="text-muted mb-2">
+                        <i class="fas fa-calendar me-1"></i>
+                        {{ movie.release_date.split('-')[0] }}
+                    </p>
+                {% endif %}
+                
+                {% if movie.runtime %}
+                    <p class="text-muted mb-2">
+                        <i class="fas fa-clock me-1"></i>
+                        {{ movie.runtime }} minutos
+                    </p>
+                {% endif %}
+                
+                {% if movie.budget and movie.budget > 0 %}
+                    <p class="text-muted mb-2">
+                        <i class="fas fa-dollar-sign me-1"></i>
+                        Orçamento: ${{ "{:,}".format(movie.budget) }}
+                    </p>
+                {% endif %}
+                
+                {% if movie.revenue and movie.revenue > 0 %}
+                    <p class="text-muted mb-2">
+                        <i class="fas fa-chart-line me-1"></i>
+                        Receita: ${{ "{:,}".format(movie.revenue) }}
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Informações detalhadas -->
+    <div class="col-lg-8 col-md-7">
+        <h1 class="mb-3">{{ movie.title }}</h1>
+        
+        {% if movie.tagline %}
+            <p class="lead text-muted mb-3">"{{ movie.tagline }}"</p>
+        {% endif %}
+        
+        {% if movie.overview %}
+            <div class="mb-4">
+                <h5>Sinopse</h5>
+                <p>{{ movie.overview }}</p>
+            </div>
+        {% endif %}
+        
+        <!-- Gêneros -->
+        {% if movie.genres %}
+            <div class="mb-4">
+                <h5>Gêneros</h5>
+                <div class="d-flex flex-wrap gap-2">
+                    {% for genre in movie.genres %}
+                        <span class="badge bg-primary">{{ genre.name }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+        
+        <!-- Status -->
+        {% if movie.status %}
+            <div class="mb-4">
+                <h5>Status</h5>
+                <span class="badge bg-success">{{ movie.status }}</span>
+            </div>
+        {% endif %}
+        
+        <!-- Idioma original -->
+        {% if movie.original_language %}
+            <div class="mb-4">
+                <h5>Idioma Original</h5>
+                <span class="badge bg-info">{{ movie.original_language.upper() }}</span>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Elenco -->
+{% if movie.credits and movie.credits.cast %}
+<div class="row mt-5">
+    <div class="col-12">
+        <h3 class="mb-4">
+            <i class="fas fa-users me-2"></i>
+            Elenco Principal
+        </h3>
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-6 g-3">
+            {% for actor in movie.credits.cast[:12] %}
+            <div class="col">
+                <div class="card border-0 shadow-sm h-100">
+                    {% if actor.profile_path %}
+                        <img src="{{ image_base_url }}{{ actor.profile_path }}" 
+                             alt="{{ actor.name }}" 
+                             class="card-img-top"
+                             style="height: 200px; object-fit: cover;">
+                    {% else %}
+                        <div class="card-img-top d-flex align-items-center justify-content-center bg-light" 
+                             style="height: 200px;">
+                            <i class="fas fa-user fa-2x text-muted"></i>
+                        </div>
+                    {% endif %}
+                    <div class="card-body p-3">
+                        <h6 class="card-title mb-1">{{ actor.name }}</h6>
+                        <small class="text-muted">{{ actor.character }}</small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Trailers -->
+{% if movie.videos and movie.videos.results %}
+<div class="row mt-5">
+    <div class="col-12">
+        <h3 class="mb-4">
+            <i class="fas fa-play-circle me-2"></i>
+            Trailers e Vídeos
+        </h3>
+        <div class="row g-4">
+            {% for video in movie.videos.results[:3] %}
+                {% if video.site == 'YouTube' %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="ratio ratio-16x9">
+                            <iframe src="https://www.youtube.com/embed/{{ video.key }}" 
+                                    title="{{ video.name }}"
+                                    allowfullscreen></iframe>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title">{{ video.name }}</h6>
+                            <small class="text-muted">{{ video.type }}</small>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Imagens -->
+{% if movie.images and movie.images.backdrops %}
+<div class="row mt-5">
+    <div class="col-12">
+        <h3 class="mb-4">
+            <i class="fas fa-images me-2"></i>
+            Imagens
+        </h3>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for image in movie.images.backdrops[:6] %}
+            <div class="col">
+                <div class="card border-0 shadow-sm">
+                    <img src="https://image.tmdb.org/t/p/w500{{ image.file_path }}" 
+                         alt="Imagem do filme" 
+                         class="card-img-top"
+                         style="height: 200px; object-fit: cover;">
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Botão voltar -->
+<div class="row mt-5">
+    <div class="col-12 text-center">
+        <a href="{{ url_for('index') }}" class="btn btn-primary">
+            <i class="fas fa-arrow-left me-2"></i>
+            Voltar aos Filmes Populares
+        </a>
+    </div>
+</div>
+{% endblock %} 
